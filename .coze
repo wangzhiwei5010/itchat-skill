@@ -1,6 +1,6 @@
 [skill]
-name=""
-description=""
-skill_package=""
-project_name=""
-project_description=""
+  skill_package = "wx-ipad-bot.skill"
+  name = "wx-ipad-bot"
+  description = "基于iPad协议的微信机器人，支持自动消息收发、联系人管理、群组操作和智能对话"
+  project_name = "ipad机器人技能"
+  project_description = "微信iPad协议机器人"
