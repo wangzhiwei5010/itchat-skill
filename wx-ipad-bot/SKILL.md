@@ -3,7 +3,7 @@ name: wx-ipad-bot
 description: 基于iPad协议的微信机器人，支持自动消息收发、联系人管理、群组操作和智能对话
 dependency:
   python:
-    - itchat>=1.3.10
+    - itchat-uos>=1.5.0.dev0
     - requests>=2.28.0
 ---
 
@@ -15,10 +15,11 @@ dependency:
 - 触发条件: 用户需要进行微信自动化操作或构建聊天机器人
 
 ## 前置准备
-- 依赖说明: 需要安装 itchat 库和 requests 库
+- 依赖说明: 需要安装 itchat-uos 库（itchat 的增强版，专门修复 iPad 协议兼容性）和 requests 库
   ```bash
-  pip install itchat>=1.3.10 requests>=2.28.0
+  pip install itchat-uos>=1.5.0.dev0 requests>=2.28.0
   ```
+  **说明**: itchat-uos 是 itchat 的社区维护版本，修复了 iPad 协议的兼容性问题，支持最新的微信版本
 - 非标准文件/文件夹准备: 无需额外准备
 
 ## 操作步骤
@@ -49,6 +50,7 @@ dependency:
 
 ## 注意事项
 - 仅在需要时读取参考，保持上下文简洁。
+- **使用 itchat-uos**: 本 Skill 使用 itchat-uos 库，这是 itchat 的增强版本，专门修复了 iPad 协议的兼容性问题
 - iPad协议登录可能触发微信安全检测，建议小频率使用。
 - 智能体负责消息理解和内容生成，脚本负责技术实现。
 - 避免高频发送消息，防止账号被封禁。
