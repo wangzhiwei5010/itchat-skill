@@ -59,24 +59,48 @@ bot.logout()
 
 ## 消息发送
 
-### send_message(to_name, message, msg_type="text")
+### send_message(to_name, message, msg_type="text", use_username=False)
 向指定好友发送消息。
 
 **参数:**
-- `to_name` (str): 接收者昵称或备注名
+- `to_name` (str): 接收者昵称、备注名或微信ID
 - `message` (str): 消息内容
 - `msg_type` (str): 消息类型，支持 "text" 或 "image"
+- `use_username` (bool): 是否直接使用 to_name 作为微信ID
+  - False: 通过昵称或备注名查找好友（默认）
+  - True: 直接使用 to_name 作为微信ID，不进行查找
 
 **返回值:**
 - `bool`: 发送是否成功
 
 **示例:**
 ```python
-# 发送文本消息
+# 使用昵称/备注名发送文本消息
 bot.send_message("张三", "你好，这是一条测试消息")
+
+# 使用微信ID直接发送消息（更快速，避免查找）
+bot.send_message("wxid_xxxxxxxxxxxxx", "通过ID发送的消息", use_username=True)
 
 # 发送图片
 bot.send_message("张三", "/path/to/image.jpg", msg_type="image")
+```
+
+**注意事项:**
+- 使用微信ID发送时，ID 格式通常为 `wxid_` 开头的字符串
+- 微信ID 可以通过 `get_friends()` 方法获取，字段名为 `UserName`
+- 使用微信ID发送更高效，避免昵称/备注名的查找过程
+
+**获取微信ID的方法:**
+```python
+# 方法1: 通过获取好友列表
+friends = bot.get_friends()
+for friend in friends:
+    display_name = friend['RemarkName'] if friend['RemarkName'] else friend['NickName']
+    print(f"{display_name} -> {friend['UserName']}")
+
+# 方法2: 使用命令行工具
+python scripts/wechat_bot.py get_friends
+# 输出文件: friends_list.json，包含 UserName 字段
 ```
 
 **支持的文件类型:**

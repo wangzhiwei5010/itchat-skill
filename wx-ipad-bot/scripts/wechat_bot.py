@@ -52,14 +52,15 @@ class WeChatBot:
         except Exception as e:
             print(f"退出登录失败: {str(e)}")
     
-    def send_message(self, to_name, message, msg_type="text"):
+    def send_message(self, to_name, message, msg_type="text", use_username=False):
         """
         发送消息
         
         Args:
-            to_name: 接收者昵称或备注名
+            to_name: 接收者昵称、备注名或微信ID
             message: 消息内容
             msg_type: 消息类型 (text/image/file)
+            use_username: 是否直接使用 to_name 作为微信ID（True=直接使用ID，False=通过昵称/备注查找）
             
         Returns:
             bool: 发送是否成功
@@ -69,15 +70,23 @@ class WeChatBot:
             return False
         
         try:
-            if msg_type == "text":
-                # 查找好友
+            target_username = None
+            
+            if use_username:
+                # 直接使用微信ID
+                target_username = to_name
+                print(f"使用微信ID: {to_name}")
+            else:
+                # 通过昵称或备注名查找好友
                 friends = itchat.search_friends(name=to_name)
                 if not friends:
                     print(f"未找到好友: {to_name}")
                     return False
-                
-                # 发送消息
-                result = itchat.send(message, toUserName=friends[0]['UserName'])
+                target_username = friends[0]['UserName']
+            
+            if msg_type == "text":
+                # 发送文本消息
+                result = itchat.send(message, toUserName=target_username)
                 if result:
                     print(f"消息已发送给 {to_name}")
                     return True
@@ -87,17 +96,13 @@ class WeChatBot:
                     
             elif msg_type == "image":
                 # 发送图片
-                friends = itchat.search_friends(name=to_name)
-                if not friends:
-                    print(f"未找到好友: {to_name}")
-                    return False
-                    
-                itchat.send_image(message, toUserName=friends[0]['UserName'])
+                itchat.send_image(message, toUserName=target_username)
                 print(f"图片已发送给 {to_name}")
                 return True
                 
             else:
                 print(f"不支持的消息类型: {msg_type}")
+                return False
                 return False
                 
         except Exception as e:
@@ -277,9 +282,10 @@ def main():
     
     # 发送消息命令
     send_parser = subparsers.add_parser('send', help='发送消息')
-    send_parser.add_argument('--to', required=True, help='接收者昵称或备注名')
+    send_parser.add_argument('--to', required=True, help='接收者昵称、备注名或微信ID')
     send_parser.add_argument('--message', required=True, help='消息内容')
     send_parser.add_argument('--type', default='text', help='消息类型 (text/image)')
+    send_parser.add_argument('--use-id', action='store_true', help='使用微信ID定位（不通过昵称/备注查找）')
     
     # 发送群消息命令
     group_parser = subparsers.add_parser('send_group', help='发送群消息')
@@ -311,7 +317,7 @@ def main():
     
     elif args.command == 'send':
         if bot.login():
-            bot.send_message(args.to, args.message, args.type)
+            bot.send_message(args.to, args.message, args.type, use_username=getattr(args, 'use_id', False))
             bot.logout()
     
     elif args.command == 'send_group':

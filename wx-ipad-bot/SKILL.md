@@ -60,8 +60,11 @@ dependency:
 # 登录
 python scripts/wechat_bot.py login
 
-# 发送消息
+# 使用昵称/备注名发送消息
 python scripts/wechat_bot.py send --to "好友备注名" --message "你好，这是一条测试消息"
+
+# 使用微信ID发送消息（直接定位，不查找昵称）
+python scripts/wechat_bot.py send --to "wxid_xxxxxxxxxxxxx" --use-id --message "通过ID发送的消息"
 ```
 
 ### 示例2: 获取好友列表
