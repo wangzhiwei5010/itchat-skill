@@ -26,8 +26,10 @@ dependency:
 - 标准流程:
   1. 登录微信
      - 执行 `python scripts/wechat_bot.py login`
-     - 扫描二维码登录微信账号
-     - 登录成功后会保存登录状态
+     - 自动检查登录状态，如有保存的状态则自动登录
+     - 如无保存状态，扫描二维码登录微信账号
+     - 登录成功后会保存登录状态，下次自动登录
+     - 如需强制重新登录，使用 `python scripts/wechat_bot.py login --force`
   2. 接收和处理消息
      - 智能体持续监控消息队列
      - 根据消息内容分析用户意图
@@ -35,6 +37,7 @@ dependency:
   3. 发送消息
      - 调用 `scripts/wechat_bot.py send --to <好友ID> --message <内容>`
      - 支持文本、图片等多种格式
+     - 自动检查登录状态，无需手动登录
   4. 管理联系人和群组
      - 调用脚本获取好友列表、群组信息
      - 智能体根据管理策略执行操作
@@ -59,8 +62,14 @@ dependency:
 
 ### 示例1: 登录并发送消息
 ```bash
-# 登录
+# 首次登录（需要扫描二维码）
 python scripts/wechat_bot.py login
+
+# 后续使用（自动检查登录状态，有保存状态则自动登录）
+python scripts/wechat_bot.py send --to "好友ID" --message "你好"
+
+# 强制重新登录（清除旧登录状态，重新扫码）
+python scripts/wechat_bot.py login --force
 
 # 使用昵称/备注名发送消息
 python scripts/wechat_bot.py send --to "好友备注名" --message "你好，这是一条测试消息"

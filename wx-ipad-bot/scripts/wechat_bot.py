@@ -26,21 +26,64 @@ class WeChatBot:
         self.is_logged_in = False
         self.message_queue = []
         
-    def login(self):
+    def check_login_status(self):
+        """
+        检查登录状态
+        
+        Returns:
+            bool: 是否已登录（登录状态文件存在且有效）
+        """
+        login_file = Path(self.login_state_file)
+        if not login_file.exists():
+            return False
+        
+        try:
+            # 尝试读取登录状态文件
+            with open(self.login_state_file, 'r', encoding='utf-8') as f:
+                login_data = json.load(f)
+            
+            # 检查是否包含必要的登录信息
+            if not login_data:
+                return False
+            
+            # 检查登录状态是否有效（根据 itchat 的状态存储结构）
+            if 'itchat_login_state' in login_data:
+                return True
+            
+            return False
+        except Exception:
+            return False
+    
+    def login(self, force=False):
         """
         登录微信
         
+        Args:
+            force: 是否强制重新登录（忽略已有的登录状态）
+            
         Returns:
             bool: 登录是否成功
         """
+        # 检查登录状态
+        if not force and self.check_login_status():
+            try:
+                # 尝试使用已有登录状态
+                itchat.auto_login(hotReload=True, statusStorageDir=self.login_state_file)
+                self.is_logged_in = True
+                print("✓ 已自动登录（使用保存的登录状态）")
+                return True
+            except Exception as e:
+                print(f"自动登录失败，需要重新登录: {str(e)}")
+        
         try:
             # 登录并启用热重载，保持登录状态
+            print("请扫描二维码登录微信...")
             itchat.auto_login(hotReload=True, statusStorageDir=self.login_state_file)
             self.is_logged_in = True
-            print("登录成功！")
+            print("✓ 登录成功！")
             return True
         except Exception as e:
-            print(f"登录失败: {str(e)}")
+            print(f"✗ 登录失败: {str(e)}")
             return False
     
     def logout(self):
@@ -279,6 +322,7 @@ def main():
     
     # 登录命令
     login_parser = subparsers.add_parser('login', help='登录微信')
+    login_parser.add_argument('--force', action='store_true', help='强制重新登录（忽略已有登录状态）')
     
     # 发送消息命令
     send_parser = subparsers.add_parser('send', help='发送消息')
@@ -311,8 +355,10 @@ def main():
     bot = WeChatBot()
     
     if args.command == 'login':
-        if bot.login():
-            print("登录成功，保持在线状态...")
+        force_login = getattr(args, 'force', False)
+        if bot.login(force=force_login):
+            if not force_login:
+                print("✓ 登录状态有效，保持在线状态...")
             itchat.run(debug=False)
     
     elif args.command == 'send':
